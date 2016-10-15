@@ -1,5 +1,7 @@
-function[chrom,coord]=createFirstGen(popSize,chrLen,parNum)
+function[chromArray,coordArray]=createFirstGen(popSize)
+global chromLen;
+global parentNum;
 % create (popsize) random chromosomes with length (chrlength)
-chrom=round(9*rand(popSize,chrLen));			
+chromArray=round(9*rand(popSize,chromLen));			
 % translate 10 digit chromosomes into X and Y coordinates
-coord=decode(chrom,popSize,parNum);				% decoding chromosomes into coordinates
+coordArray=decode(chromArray,popSize,parentNum);		

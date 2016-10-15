@@ -1,4 +1,8 @@
-function[Frx,Fry]=getRepulsive(X,Y,RObstacle,XObstacle,YObstacle,Kr,NoObstacles)
+function[Frx,Fry]=getRepulsive(X,Y,Kr)
+global NoObstacles;                             
+global XObstacle;                       
+global YObstacle;
+global RObstacle; 
 Frx = 0;
 Fry = 0;
 for n=1:NoObstacles    
