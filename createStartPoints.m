@@ -1,4 +1,4 @@
-function[chromArray,coordArray]=createFirstGen(popSize)
+function[coordArray]=createStartPoints(popSize)
 global chromLen;
 global parentNum;
 % create (popsize) random chromosomes with length (chrlength)
