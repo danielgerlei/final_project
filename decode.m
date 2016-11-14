@@ -1,24 +1,15 @@
-% decode function
-% inputs: 
-%        Chromosomes
-%        Population size
-%        Number of parents
-% output:
-%        2 by popsize matrix of X and Y coordinates generated from the
-%        input matrix
-function[q2]=decode(chrom,popsize,parlen)
-length = size(chrom);
-chromlength = length(2);
-halfchrom = chromlength/2;
-for ind = 1:popsize,
-	for jin = 1:parlen,
-		jcon = halfchrom *(jin-1);                % points to second half of chromosome
+function[coordArray]=decode(chromArray,popSize,parentLen)
+chromLength = size(chromArray,2);
+halfChrom = chromLength/parentLen;
+for ind = 1:popSize
+	for jin = 1:parentLen,
+		jPoint = halfChrom *(jin-1);    
         % multiply the digits of the chromosome by their appropriate decimal power and summing them
-		temp1=20*chrom(ind,1+jcon)+2*chrom(ind,2+jcon)+0.2*chrom(ind,3+jcon)+0.02*chrom(ind,4+jcon)+0.002*chrom(ind,5+jcon);
+		temp1=20*chromArray(ind,1+jPoint)+2*chromArray(ind,2+jPoint)+0.2*chromArray(ind,3+jPoint)+0.02*chromArray(ind,4+jPoint)+0.002*chromArray(ind,5+jPoint);
         % treat the fifth digit of the chromosome to represent a power of ten
 		%temp2=ceil(chrom(ind,halfchrom + jcon))/4 - 2;
         temp2=0;
         % return 2 by popsize matrix to represent X and y coordinates
-		q2(jin,ind)=temp1*10^temp2;
+		coordArray(jin,ind)=temp1*10^temp2;
 	end
 end
