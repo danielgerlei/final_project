@@ -14,6 +14,7 @@ global Fmax;
 global radioRange;
 global KrPersonal;
 global KrGlobal;
+global mutRate;
 %% Setup
 radioRange = 40;
 sensorFootprint = 1;            % radius in meters
@@ -29,6 +30,7 @@ transmit = 0;                   % transmission timer
 KrPersonal = 0.00001;
 KrGlobal = 0.000007;
 popSize = 20;
+mutRate = 10;
 timeLimit = timeLimit*60;     
 searchLimit = searchLimit*60;
 timestamps = 0;
