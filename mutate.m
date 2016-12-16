@@ -7,7 +7,6 @@
 % output: 
 %        Matrix of mutated children
 function[kinder]=mutate(murate,chinum,chrlen,kinder)
-
 ptemp=1;                                    % initial starting point
 MutPart=100/murate;                         % mutation partition
 ChangeNum=round((chinum*chrlen)/MutPart);   % number of changes

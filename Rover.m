@@ -17,6 +17,34 @@ classdef Rover < handle
         chromosomes
         decodedChrom
         velVector
+        xi
+        xo
+        PIDvector
+% xi and xo are 24 member vectors with the following structure:
+% 1 Left Front Wheel Current
+% 2 Left Front Wheel Rotational Spee
+% 3 Left Front Wheel Torque
+% 4 Left Rear Wheel Current
+% 5 Left Rear Wheel Rotational Spee
+% 6 Left Rear Wheel Torque
+% 7 Right Front Wheel Current
+% 8 Right Front Wheel Rotational Spe
+% 9 Right Front Wheel Torque
+% 10 Right Rear Wheel Current
+% 11 Right Rear Wheel Rotational Spe
+% 12 Right Rear Wheel Torque
+% 13 u - DoF(1) - Surge Velocity
+% 14 v - DoF(2) - Sway Velocity
+% 15 w - DoF(3) - Heave Velocity
+% 16 p - DoF(4) - Roll Velocity
+% 17 q - DoF(5) - Pitch Velocity
+% 18 r - DoF(6) - Yaw Velocity
+% 19 x - DoF(1) - Surge position
+% 20 y - DoF(2) - Sway position
+% 21 z - DoF(3) - Heave position
+% 22 - DoF(4) - Roll position
+% 23 - DoF(5) - Pitch position
+% 24 - DoF(6) - Yaw position
     end
     
     methods
@@ -35,7 +63,10 @@ classdef Rover < handle
             this.pathYarray = y;
             this.arrived = true;
             this.nextWaypoint = [x,y];
+            this.xiPack();
+            this.xo = this.xi;
             [this.chromosomes,this.decodedChrom] = createFirstGen(popSize);
+            this.PIDvector = [0,0];
         end
         
         function[timestamp]=getStep(this,maxSpeed,step,roverPointer,time)
@@ -50,8 +81,8 @@ classdef Rover < handle
             Y = this.currentY;
             Xvelocity = this.Xvel;
             Yvelocity = this.Yvel;
-            Ka = 1;             % attraction constant
-            Kr = -15000;        % repulsion constant
+            Ka = 100;           % attraction constant
+            Kr = -3000000;     % repulsion constant
             stuck = 0;          % velocity under witch the craft is considered stuck
             slowSet = 100;      % after bumping into an obstacle, checking for being stuck
             slow = slowSet;     % is temporalily halted to avoid a self exciting loop
@@ -69,25 +100,54 @@ classdef Rover < handle
                 % calculate new position
                 Xvelocity=Euler(Xvelocity,Xforce,step);   % Euler forward integration to get velocity
                 Yvelocity=Euler(Yvelocity,Yforce,step);
-                [Xvelocity,Yvelocity]=limitSpeed(Xvelocity,Yvelocity,maxSpeed);
+%                 [Xvelocity,Yvelocity]=limitSpeed(Xvelocity,Yvelocity,maxSpeed);
                 % if the craft is stuck, generate random velocity
-                [Xvelocity,Yvelocity,slow]=unStuck(Xvelocity,Yvelocity,stuck,slow,slowSet,Kran);
-                X = Euler(X,Xvelocity,step);         % Euler forward integration to get position      
-                Y = Euler(Y,Yvelocity,step);
-                % store data 
-                coord=[X,Y];
-                this.updatePosition(X,Y);
-                this.Xvel = Xvelocity;
-                this.Yvel = Yvelocity;
-                this.velVector = [this.Xvel,this.Yvel];
+                [Xvelocity,Yvelocity,slow] = unStuck(Xvelocity,Yvelocity,stuck,slow,slowSet,Kran);
+                [Vfr,Vrr,Vfl,Vrl] = getVoltages(this,Xvelocity,Yvelocity);
+                on = 1;
+                if (on == 1)
+                    [xdot, this.xo] = full_mdl_motors([Vfr,Vrr,Vfl,Vrl],this.xi,0,0,0,0,step); 
+                    this.xi = Euler(this.xo,xdot,step);
+                    this.xiUnpack();
+                else
+                    this.Xvel = Xvelocity;
+                    this.Yvel = Yvelocity;
+                    X = Euler(X,Xvelocity,step);
+                    Y = Euler(Y,Yvelocity,step);
+                    this.currentX = X;
+                    this.currentY = Y;
+                end
                 XObstacle(NoObstacles+roverPointer) = this.currentX;
                 YObstacle(NoObstacles+roverPointer) = this.currentY;
                 this.savePath();
                 strength=getStrength(X,Y);
-                timestamp = this.saveTarg(coord,strength,time);
+                timestamp = this.saveTarg([this.currentX,this.currentY],strength,time);
                 this.arrived = false;
             else
                 this.arrived = true;
+            end
+        end
+        
+        function[]=xiUnpack(this)
+            this.currentX = this.xi(19);
+            this.currentY = this.xi(20);
+            this.Xvel = this.xi(13)*cos(this.xi(24));
+            this.Yvel = this.xi(13)*sin(this.xi(24));
+            this.velVector = [this.Xvel,this.Yvel];
+        end
+        
+        function[]=xiPack(this)
+            this.xi = zeros(1,24);
+            this.xi(19) = this.currentX;
+            this.xi(20) = this.currentY;
+            this.xi(13) = (this.Xvel^2 + this.Yvel^2)^(1/2);
+            if (this.Xvel == 0)
+                this.xi(24) = sign(this.Yvel)*(pi/2);
+            else
+                this.xi(24) = atan(this.Yvel/this.Xvel);
+            end     
+            if (this.Yvel == 0)
+                this.xi(24) = (sign(this.Xvel)-1)*pi;
             end
         end
         
@@ -148,6 +208,7 @@ classdef Rover < handle
                     this.foundList(3,this.foundPointer) = F;
                     this.foundPointer = this.foundPointer+1;
                     ran = ceil((elitePop-1)*rand(1))+1;
+                    ran = 1;
                     this.chromosomes(ran,:) = encode(coord);
                     this.decodedChrom(:,ran) = coord;
                     timestamp = time;

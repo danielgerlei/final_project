@@ -1,4 +1,5 @@
-% Genetic Algorithm based optimiser to 
+% Genetic Algorithm based optimiser to determine optimal parameters for the
+% searches
 
 clear
 
@@ -30,8 +31,6 @@ for n = 1:popSize
 %     results = Move_swarm(coord(1,n),coord(2,n),coord(2,n));
     F(n) = evaluateOptimiser(results,targetCoverage,targetPointsFound,targetTime);      % evaluate the first generation  
 end
-
-
 
 [chrom,coord,F]=sort_swap(chrom,coord,F,popSize);		% sort outcomes according to F score for reproduction (elitism)
 

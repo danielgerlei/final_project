@@ -1,5 +1,5 @@
+% Move_hybrid(0.00005,0.00001,10,10)
 clc
-clear
 %% Global variables
 global targetXarray;
 global targetYarray;
@@ -16,23 +16,32 @@ global KrPersonal;
 global KrGlobal;
 global mutRate;
 global generationNum;
+global step;
+global KpH;
+global KiH;
+global KdH;
+global edgeLength;
+
 %% Setup
+KpH = 8;
+KiH = 1;
+KdH = -0.75;
 radioRange = 40;
 sensorFootprint = 1;            % radius in meters
 roverNum = 10;                  % number of rovers
 timeLimit = 60;                 % time spent exploring the search space in minutes
-searchLimit = 10;               % time spent exploring a specific search area (including travel time)
-step = 0.2;                     % size of timestep
-maxSpeed = 0.2;                 % speed limiter on rovers
+searchLimit = 3;                % time spent exploring a specific search area (including travel time)
+step = 0.01;                    % size of timestep
+edgeLength = 200;
 parentNum = 2;                  % number of parents
 chromLen = 5*parentNum;         % length of chromosomes
-transmissionFreq = 1;           % every N seconds
-transmit = 0;                   % transmission timer
-KrPersonal = 0.00001;
-KrGlobal = 0.000007;
-popSize = 20;
 mutRate = 10;
 generationNum = 10;
+transmissionFreq = 1;           % every N seconds
+transmit = 0;                   % transmission timer
+KrPersonal = 15*10^(-1);        % random variables for PS trajectory generation
+KrGlobal = 15*10^(-1);
+popSize = 20;
 timeLimit = timeLimit*60;     
 searchLimit = searchLimit*60;
 timestamps = 0;
@@ -59,10 +68,11 @@ for r = 1:roverNum
    RObstacle(NoObstacles+r) = 1;
 end
 
-[rovers,time]=setupPS(rovers,maxSpeed,step);
-[chromArray,coordArray]=createFirstGen(popSize);
-waypoint = findBP(rovers,[1,2,3,4,5,6,7,8,9,10]);
-%% Main
+[rovers,time] = setupPS(rovers,step,timestamps,stampPointer);
+[chromArray,coordArray] = createFirstGen(popSize);
+waypoint = findBP(rovers,1:roverNum,rovers(1).bestPosition);
+timestamps = [0,0,timeLimit/60,1]; % predefine as high number to avoid errors at output stage if no points are found
+% Main
 while (time<timeLimit)
     for r=1:roverNum  
         if (searchCounter>searchLimit)
@@ -76,7 +86,7 @@ while (time<timeLimit)
         neighbours = rovers(r).findNeighbours(rovers);
         bestPosition = rovers(r).nextWaypoint;
 %        bestPosition = findBP(rovers,neighbours);
-        nextTimestamp = rovers(r).getStepPS(bestPosition,maxSpeed,step,r,time);
+        nextTimestamp = rovers(r).getStepPS(bestPosition,step,r,time);
         if (nextTimestamp ~= 0)
             [timestamps,stampPointer] = saveStamp(timestamps,stampPointer,nextTimestamp,rovers,r);
         end
@@ -95,48 +105,4 @@ while (time<timeLimit)
     writeTime(time);
     transmit = transmit+step;
 end
-
-% Plotting
-figure (1)
-clf
-covered = 0;
- for r=1:roverNum
-     [pathX,pathY]=rovers(r).getPathList();
-     plot(pathX,pathY) 
-     hold on
-     covered = covered+size(pathX,2);
- end
- ang = 0:0.01:2*pi;
-for n=1:NoObstacles
-    xp=RObstacle(n)*cos(ang);
-    yp=RObstacle(n)*sin(ang);
-    plot(XObstacle(n)+xp,YObstacle(n)+yp,'k');
-end
-for n=1:size(targetXarray,2)
-    xp=targetRarray(n)*cos(ang);
-    yp=targetRarray(n)*sin(ang);
-    plot(targetXarray(n)+xp,targetYarray(n)+yp,'r');
-end
- plot(targetXarray,targetYarray,'rx')
- axis([-20 220 -20 220])
- figure (2)
- clf
- for r=1:roverNum
-     fl=rovers(r).getFoundList();
-     plot(fl(1,:),fl(2,:),'Marker','o','MarkerEdgeColor',[0.5*r/roverNum 1*r/roverNum 0.3*r/roverNum],'LineStyle','none')
-     hold on
- end
- plot(targetXarray,targetYarray,'ro')
- axis([-20 220 -20 220])
- 
-figure (3)
-clf
-for r=1:roverNum
-    [pathX,pathY]=rovers(r).getPathList();
-    plot(pathX,pathY,'k','LineWidth',sensorFootprint*2) 
-    hold on
-end
-axis([0 200 0 200])
-saveas(gcf,'coverage.bmp','bmp') 
-getCoverage();
-  
+displayResults(rovers,roverNum,sensorFootprint) 

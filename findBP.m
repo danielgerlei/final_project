@@ -1,5 +1,4 @@
-function[bestPosition] = findBP(rovers,neighbours)
-bestPosition = [100,100]; % this creates a force drawing towards the origin until a point of interest is found
+function[bestPosition] = findBP(rovers,neighbours,bestPosition)
 strengthBest = getStrength(bestPosition(1),bestPosition(2));
 if (neighbours ~=0)
     for n=1:size(neighbours,2)

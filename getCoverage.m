@@ -1,4 +1,4 @@
-function[]=getCoverage()
+function[coverage]=getCoverage()
 global RObstacle;
 Xmin = 115;     % size of the image saved
 Xmax = 794;

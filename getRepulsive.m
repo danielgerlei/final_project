@@ -2,6 +2,7 @@ function[Frx,Fry]=getRepulsive(X,Y,Kr)
 global XObstacle;                       
 global YObstacle;
 global RObstacle;
+global edgeLength;
 Frx = 0;
 Fry = 0;
 for n=1:size(XObstacle,2)   
@@ -19,4 +20,10 @@ for n=1:size(XObstacle,2)
              Fry = Fry + Kr*((1/((((X-XObstacle(n))^2)+((Y-YObstacle(n))^2))^(1/2)))-(1/RObstacle(n)))*signY;
         end
     end
+end
+if (X > edgeLength*1.1 || X < 0)
+    Frx = -sign(X)*Kr;
+end
+if (Y > edgeLength*1.1 || Y < 0)
+    Fry = -sign(Y)*Kr;
 end
