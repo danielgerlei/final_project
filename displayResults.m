@@ -13,6 +13,8 @@ clf
      [pathX,pathY]=rovers(r).getPathList();
      plot(pathX,pathY) 
      hold on
+     [waypoints]=rovers(r).getWaypointsList;
+     plot(waypoints(1,:),waypoints(2,:),'bx')
  end
  ang = 0:0.01:2*pi;
 for n=1:NoObstacles

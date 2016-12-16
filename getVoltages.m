@@ -2,6 +2,8 @@ function[Vfr,Vrr,Vfl,Vrl] = getVoltages(rover,Xvelocity,Yvelocity)
 global KpH;
 global KiH;
 global KdH;
+global desiredHeadingArray;
+global desiredHeadingPointer;
 
 Vmax = 12;
 fuzz = 1;   
@@ -60,3 +62,6 @@ Vfr = VoltageRight;
 Vrr = VoltageRight;
 Vfl = VoltageLeft;
 Vrl = VoltageLeft;
+
+desiredHeadingArray(desiredHeadingPointer) = desiredHeading;
+desiredHeadingPointer = desiredHeadingPointer+1;

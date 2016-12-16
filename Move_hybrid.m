@@ -23,9 +23,9 @@ global KdH;
 global edgeLength;
 
 %% Setup
-KpH = 8;
-KiH = 1;
-KdH = -0.75;
+KpH = 5;
+KiH = 1.75;
+KdH = -1.35;
 radioRange = 40;
 sensorFootprint = 1;            % radius in meters
 roverNum = 10;                  % number of rovers

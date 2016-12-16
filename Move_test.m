@@ -17,15 +17,19 @@ global KpH;
 global KiH;
 global KdH;
 global step;
+global desiredHeadingArray;
+global desiredHeadingPointer;
+global headingPointer;
+global heading;
 
-KpH = 8;
+KpH = 5;
 KiH = 1;
 KdH = -0.75;
 radioRange = 40;
 roverNum = 1;                   % number of rovers
 popSize = 20;
 generationNum = 10;             % number of generations run between selecting waypoints
-timeLimit = 3;                  % in minutes
+timeLimit = 30;                  % in minutes
 step = 0.01;                    % size of timestep
 maxSpeed = 0.2;                 % speed limiter on rovers
 time = 0;          
@@ -38,6 +42,10 @@ sensorFootprint = 1;            % radius in meters
 timeLimit = timeLimit*60;
 timestamps = 0;
 stampPointer = 1;
+desiredHeadingArray = 0;
+heading = 0;
+desiredHeadingPointer = 1;
+headingPointer = 1;
 
 rovers(1) = Rover(100,100,popSize);    % lead rover start position
 for r = 2:roverNum                     % line up the rest of the rovers
@@ -67,8 +75,11 @@ while (time<timeLimit & rovers(1).Xvel<10000 )
             waypoint = [targetXarray(target),targetYarray(target)];
             rovers(r).setWaypoint(waypoint);
             target = target+1;
+            if target == size(targetXarray,2)+1
+                target = 1;
+            end
         end
-        nextTimestamp = rovers(r).getStep(maxSpeed,step,r,time);
+        nextTimestamp = rovers(r).getStep(step,r,time);
         if (nextTimestamp ~= 0)
             [timestamps,stampPointer] = saveStamp(timestamps,stampPointer,nextTimestamp,rovers,r);
         end
@@ -108,6 +119,13 @@ for n=1:size(targetXarray,2)
 end
 plot(targetXarray,targetYarray,'rx')
 axis([0 200 0 200])
+
 figure (2)
 clf
 plot((Xvelocity.^2+Yvelocity.^2).^(1/2))
+
+figure (3)
+clf
+plot(desiredHeadingArray)
+hold on
+plot(heading,'r')

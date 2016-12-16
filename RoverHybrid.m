@@ -93,7 +93,7 @@ classdef RoverHybrid < handle
             Kran = 0;           % constant multiplier for the random velocities
 
             distance = ((Xtarget-X)^2 + (Ytarget-Y)^2)^(1/2);   % distance from target
-            if (distance>0.2)
+            if (distance>0.5)
                 % Calculate forces
                 Fax = Ka*(X-Xtarget);                           % Attractive forces
                 Fay = Ka*(Y-Ytarget);

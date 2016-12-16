@@ -19,14 +19,18 @@ global KpH;
 global KiH;
 global KdH;
 global edgeLength;
+global desiredHeadingArray;
+global desiredHeadingPointer;
+global headingPointer;
+global heading;
 
 %% Setup
-KpH = 8;
-KiH = 1;
-KdH = -0.75;
+KpH = 7;
+KiH = 0;
+KdH = 0;
 radioRange = 80;
 sensorFootprint = 1;            % radius in meters
-roverNum = 10;                  % number of rovers
+roverNum = 1;                  % number of rovers
 timeLimit = 60;                 % in minutes
 step = 0.01;                    % size of timestep
 parentNum = 2;                  % number of parents
@@ -37,6 +41,10 @@ edgeLength = 200;
 timeLimit = timeLimit*60;
 timestamps = 0;
 stampPointer = 1;
+desiredHeadingArray = 0;
+heading = 0;
+desiredHeadingPointer = 1;
+headingPointer = 1;
 
 rovers(1) = RoverPS(100,100);   % lead rover start position
 for r = 2:roverNum              % line up the rest of the rovers
@@ -76,3 +84,10 @@ while (time<timeLimit)
     writeTime(time);
 end
 displayResults(rovers,roverNum,sensorFootprint)
+if roverNum == 1
+    figure (4)
+    clf
+    plot(desiredHeadingArray)
+    hold on
+    plot(heading,'r')
+end

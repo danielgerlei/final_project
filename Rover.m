@@ -69,10 +69,12 @@ classdef Rover < handle
             this.PIDvector = [0,0];
         end
         
-        function[timestamp]=getStep(this,maxSpeed,step,roverPointer,time)
+        function[timestamp]=getStep(this,step,roverPointer,time)
             global NoObstacles;                             
             global XObstacle;                       
             global YObstacle;
+            global heading;
+            global headingPointer;
             
             timestamp = 0;
             Xtarget = this.nextWaypoint(1);
@@ -89,7 +91,7 @@ classdef Rover < handle
             Kran = 0;           % constant multiplier for the random velocities
 
             distance = ((Xtarget-X)^2 + (Ytarget-Y)^2)^(1/2);   % distance from target
-            if (distance>0.2)
+            if (distance>0.5)
                 % Calculate forces
                 Fax = Ka*(X-Xtarget);                           % Attractive forces
                 Fay = Ka*(Y-Ytarget);
@@ -109,6 +111,8 @@ classdef Rover < handle
                     [xdot, this.xo] = full_mdl_motors([Vfr,Vrr,Vfl,Vrl],this.xi,0,0,0,0,step); 
                     this.xi = Euler(this.xo,xdot,step);
                     this.xiUnpack();
+                    heading(headingPointer) = this.xi(24);
+                    headingPointer = headingPointer+1;
                 else
                     this.Xvel = Xvelocity;
                     this.Yvel = Yvelocity;

@@ -74,6 +74,8 @@ classdef RoverPS < handle
             global NoObstacles;                             
             global XObstacle;                       
             global YObstacle;
+            global heading;
+            global headingPointer;
             
             timestamp = 0;
             Xtarget = this.nextWaypoint(1);
@@ -109,6 +111,8 @@ classdef RoverPS < handle
                     [xdot, this.xo] = full_mdl_motors([Vfr,Vrr,Vfl,Vrl],this.xi,0,0,0,0,step); 
                     this.xi = Euler(this.xo,xdot,step);
                     this.xiUnpack();
+                    heading(headingPointer) = this.xi(24);
+                    headingPointer = headingPointer+1;
                 else
                     this.Xvel = Xvelocity;
                     this.Yvel = Yvelocity;
@@ -135,6 +139,8 @@ classdef RoverPS < handle
             global KrPersonal
             global KrGlobal
             global edgeLength
+            global heading;
+            global headingPointer;
             Krep = 150000000000;
             this.velVector = this.velVector+(KrPersonal*rand(1)).*(this.bestPosition-[this.currentX,this.currentY])+(KrGlobal*rand(1)).*(bestPosition-[this.currentX,this.currentY]);
             [frx,fry] = getRepulsive(this.currentX,this.currentY,Krep);
@@ -151,6 +157,8 @@ classdef RoverPS < handle
                 [xdot, this.xo] = full_mdl_motors([Vfr,Vrr,Vfl,Vrl],this.xi,0,0,0,0,step); 
                 this.xi = Euler(this.xo,xdot,step);
                 this.xiUnpack();
+                heading(headingPointer) = this.xi(24);
+                headingPointer = headingPointer+1;
             else
                 this.Xvel = this.velVector(1);
                 this.Yvel = this.velVector(2);

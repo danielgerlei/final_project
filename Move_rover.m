@@ -18,10 +18,14 @@ global KpH;
 global KiH;
 global KdH;
 global edgeLength;
+global desiredHeadingArray;
+global desiredHeadingPointer;
+global headingPointer;
+global heading;
 
-KpH = 8;
-KiH = 1;
-KdH = -0.75;
+KpH = 5;
+KiH = 1.75;
+KdH = -1.35;
 radioRange = 40;
 roverNum = 10;                  % number of rovers
 popSize = 20;
@@ -40,6 +44,10 @@ edgeLength = 200;
 timeLimit = timeLimit*60;
 timestamps = 0;
 stampPointer = 1;
+desiredHeadingArray = 0;
+heading = 0;
+desiredHeadingPointer = 1;
+headingPointer = 1;
 
 rovers(1) = Rover(100,100,popSize);    % lead rover start position
 for r = 2:roverNum                     % line up the rest of the rovers
@@ -72,7 +80,7 @@ while (time<timeLimit)
             rovers(r).chromosomes = chromMatrix;
             rovers(r).decodedChrom = coordMatrix;
         end
-        nextTimestamp = rovers(r).getStep(maxSpeed,step,r,time);
+        nextTimestamp = rovers(r).getStep(step,r,time);
         if (nextTimestamp ~= 0)
             [timestamps,stampPointer] = saveStamp(timestamps,stampPointer,nextTimestamp,rovers,r);
         end
@@ -87,3 +95,10 @@ while (time<timeLimit)
     transmit = transmit+step;
 end
 displayResults(rovers,roverNum,sensorFootprint)
+if roverNum == 1
+    figure (4)
+    clf
+    plot(desiredHeadingArray)
+    hold on
+    plot(heading,'r')
+end
